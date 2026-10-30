@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="ZEHUT creative agency, Jerusalem. Films for fashion, real estate, events, food and proposals.">
+<meta name="description" content="ZEHUT creative agency, Jerusalem. Films for fashion, real estate, events, event art, food and proposals.">
 <title>ZEHUT</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap"><style>
 /* Layout: one washi-paper canvas, Japanese restraint (ma). Wordmark bottom-left, vertical tag top-right,
    typewritten category notes that drift with the cursor at different depths. An ink dot follows the pointer.
@@ -35,12 +35,14 @@ a:focus-visible,button:focus-visible{outline:1px solid var(--ink);outline-offset
 .p3{top:38%;left:67%}
 .p4{top:53%;left:32%}
 .p5{top:67%;left:70%}
+.p6{top:35%;left:7%}
 @media (max-width:640px){
   .p1{top:17%;left:9%}
   .p2{top:29%;left:55%}
   .p3{top:41%;left:17%}
   .p4{top:53%;left:50%}
   .p5{top:64%;left:9%}
+  .p6{top:9%;left:36%}
   .coord{display:none}
 }
 
@@ -130,9 +132,10 @@ var CATS=[
   {key:"realestate",name:"Real Estate",videos:[{id:"",title:"New project, Jerusalem"},{id:"",title:"Penthouse tour"},{id:"",title:"Site progress"}]},
   {key:"events",name:"Events",videos:[{id:"1241272626",title:"NYC"},{id:"1241272502",title:"HASC"},{id:"1241280526",title:"HASC II"},{id:"1241280184",title:"YAMA"},{id:"1241273655",title:"Production"}]},
   {key:"food",name:"Food",videos:[{id:"1241282031",title:"REN"},{id:"1241281237",title:"Drink"},{id:"1241281381",title:"Dish"},{id:"1241281839",title:"Fish"},{id:"1241281619",title:"Dining"},{id:"1241281096",title:"Sol Dining"}]},
+  {key:"eventart",name:"Event Art",videos:[{id:"",title:"Coming soon"},{id:"",title:"Coming soon"},{id:"",title:"Coming soon"}]},
   {key:"proposals",name:"Proposals",videos:[{id:"",title:"Rooftop, Jerusalem"},{id:"",title:"Old City at dawn"},{id:"",title:"Sea of Galilee"}]}
 ];
-var DEPTH=[1.0,0.45,0.8,0.3,0.65];
+var DEPTH=[1.0,0.45,0.8,0.3,0.65,0.55];
 /* Free Vimeo: false. After upgrading to a paid Vimeo plan, set true for frameless background playback. */
 var VIMEO_PAID=false;
 /* Inside the Claude preview, outside players are blocked: show a designed tile that links out instead. */
