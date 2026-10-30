@@ -263,7 +263,7 @@ function showWall(c){
       box.appendChild(el('iframe',{src:'https://www.youtube-nocookie.com/embed/'+v.youtube+'?autoplay=1&mute=1&loop=1&playlist='+v.youtube+'&controls=0&playsinline=1&rel=0&modestbranding=1',allow:'autoplay; fullscreen; picture-in-picture',title:v.title,loading:'lazy'}));
     }else if(/^\d+$/.test(v.id||'')){
       var th=el('button',{class:'thumb',type:'button','aria-label':'Play '+v.title});
-      var img=el('img',{alt:'',loading:'lazy',decoding:'async'});
+      var img=el('img',{alt:'',decoding:'async'});
       th.appendChild(img);th.appendChild(el('span',{class:'play','aria-hidden':'true'},'▶'));
       th.addEventListener('click',function(){playInline(box,v)});
       box.appendChild(th);
