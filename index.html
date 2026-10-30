@@ -80,6 +80,8 @@ body.in-wall .tag,body.in-wall .coord{opacity:0;visibility:hidden}
 .thumb{position:absolute;inset:0;border:0;padding:0;margin:0;background:var(--tile);cursor:pointer;display:block;width:100%}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .6s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
 .thumb img.in{opacity:1}
+.box.playing .thumb{display:none}
+.box.playing{z-index:30}
 .thumb:hover img{transform:scale(1.03)}
 .thumb .play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:52px;height:52px;font-size:14px;border-radius:50%;background:var(--paper);color:var(--ink);font-size:11px;display:flex;align-items:center;justify-content:center;padding-left:2px;opacity:.9}
 .lb{position:fixed;inset:0;z-index:50;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:calc(env(safe-area-inset-top,0px) + 24px) calc(env(safe-area-inset-bottom,0px) + 24px)}
@@ -170,7 +172,17 @@ function tick(){
 }
 requestAnimationFrame(tick);
 
+/* A tapped film plays right inside its own tile, with sound; starting another stops the first. */
+var current=null;
+function playInline(box,v){
+  stopInline();
+  var f=el('iframe',{src:'https://player.vimeo.com/video/'+v.id+'?autoplay=1&playsinline=1&title=0&byline=0&portrait=0&dnt=1',allow:'autoplay; fullscreen; picture-in-picture',title:v.title});
+  box.appendChild(f);box.classList.add('playing');current={box:box,f:f};
+}
+function stopInline(){if(current){current.f.remove();current.box.classList.remove('playing');current=null}}
+
 function showWall(c){
+  current=null;
   wall.textContent='';
   var head=el('div',{class:'wall-head'});
   head.appendChild(el('h2',{},c.name));
@@ -189,9 +201,9 @@ function showWall(c){
       var th=el('button',{class:'thumb',type:'button','aria-label':'Play '+v.title});
       var img=el('img',{alt:'',loading:'lazy',decoding:'async'});
       th.appendChild(img);th.appendChild(el('span',{class:'play','aria-hidden':'true'},'▶'));
-      th.addEventListener('click',function(){openFilm(v)});
+      th.addEventListener('click',function(){playInline(box,v)});
       box.appendChild(th);
-      loadThumb(v.id,img);
+      if(v.poster){img.onload=function(){img.classList.add('in')};img.src=v.poster}else{loadThumb(v.id,img)}
     }else{
       box.appendChild(el('div',{class:'ph'},'example'));
     }
