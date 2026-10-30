@@ -67,8 +67,17 @@ a:focus-visible,button:focus-visible{outline:1px solid var(--ink);outline-offset
 .pv-t{font-size:clamp(16px,2vw,22px);letter-spacing:.02em}
 .pv-p{font-size:11px;letter-spacing:.12em;opacity:.75}
 .box .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--soft);font-family:var(--type);font-size:11px;letter-spacing:.1em}
-.r p{margin:12px 0 0;font-family:var(--type);font-size:11px;letter-spacing:.04em;color:var(--ink);display:flex;gap:10px}
+.r p{margin:10px 0 0;font-family:var(--type);font-size:11px;letter-spacing:.04em;color:var(--ink);display:flex;gap:10px}
 .r p i{font-style:normal;color:var(--soft)}
+
+/* Collage: tiles placed by hand-tuned slots, overlapping, the one you touch rises to the top. */
+.reels.collage{display:block;position:relative;max-width:1040px;margin:0 auto}
+.reels.collage .r{position:absolute;transform:none!important;transition:box-shadow .4s ease}
+.reels.collage .r .box{box-shadow:0 1px 0 var(--hair),0 18px 40px -24px rgba(40,35,25,.35)}
+.reels.collage .r:hover,.reels.collage .r:focus-within{z-index:20!important}
+.reels.collage .r p{background:var(--paper);display:inline-flex;padding:4px 8px 4px 0}
+body.in-wall .tag,body.in-wall .coord{opacity:0;visibility:hidden}
+.tag,.coord{transition:opacity .4s ease,visibility .4s}
 
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:no-preference){.view{animation:fade .7s ease both}@keyframes fade{from{opacity:0}to{opacity:1}}}
@@ -179,14 +188,41 @@ function showWall(c){
     r.appendChild(p);
     grid.appendChild(r);
   });
+  grid.classList.add('collage');
   wall.appendChild(grid);
+  layout();
 }
+
+/* Collage slots: left, top and width in % of the wall's width; height follows 9:16.
+   Fixed, so every visit shows the same composition. Overlaps are deliberate. */
+var SLOTS=[
+  {l:3,t:0,w:34,z:2},{l:31,t:30,w:26,z:4},{l:62,t:4,w:30,z:1},
+  {l:55,t:50,w:27,z:5},{l:10,t:64,w:29,z:3},{l:68,t:100,w:24,z:2},
+  {l:34,t:112,w:27,z:4},{l:4,t:128,w:25,z:1},{l:60,t:150,w:30,z:3}
+];
+var SLOTS_PHONE=[
+  {l:0,t:0,w:58,z:2},{l:40,t:48,w:56,z:3},{l:4,t:102,w:52,z:1},
+  {l:44,t:146,w:54,z:4},{l:0,t:196,w:56,z:2},{l:42,t:244,w:54,z:3}
+];
+function layout(){
+  var g=wall.querySelector('.reels.collage');if(!g)return;
+  var W=g.clientWidth,phone=W<560,S=phone?SLOTS_PHONE:SLOTS,n=S.length,bottom=0;
+  var tiles=g.querySelectorAll('.r');
+  for(var i=0;i<tiles.length;i++){
+    var s=S[i%n],round=Math.floor(i/n),step=phone?300:190;
+    var top=(s.t+round*step)*W/100,w=s.w*W/100,h=w*16/9;
+    var r=tiles[i];r.style.left=(s.l*W/100)+'px';r.style.top=top+'px';r.style.width=w+'px';r.style.zIndex=s.z;
+    bottom=Math.max(bottom,top+h+40);
+  }
+  g.style.height=bottom+'px';
+}
+window.addEventListener('resize',layout);
 
 function route(){
   var k=location.hash.slice(1),c=null;
   for(var i=0;i<CATS.length;i++)if(CATS[i].key===k)c=CATS[i];
-  if(c){showWall(c);home.hidden=true;wall.hidden=false;window.scrollTo(0,0)}
-  else{wall.hidden=true;home.hidden=false}
+  if(c){showWall(c);home.hidden=true;wall.hidden=false;document.body.classList.add('in-wall');layout();window.scrollTo(0,0)}
+  else{wall.hidden=true;home.hidden=false;document.body.classList.remove('in-wall')}
 }
 window.addEventListener('hashchange',route);
 route();
