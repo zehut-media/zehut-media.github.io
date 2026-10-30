@@ -129,10 +129,10 @@ body.lb-open .mark{opacity:0;pointer-events:none}
    Nothing filled = example tile. */
 var CATS=[
   {key:"fashion",name:"Fashion",videos:[{id:"1241057121",title:"Maneland"}]},
-  {key:"realestate",name:"Real Estate",videos:[{id:"1241270552",title:"Real Estate I"},{id:"1241270714",title:"Real Estate II"},{id:"1241270204",title:"Real Estate III"},{id:"1241270283",title:"Real Estate IV"},{id:"1241270416",title:"Real Estate V"},{id:"1241270997",title:"Real Estate VI"},{id:"1241271146",title:"Real Estate VII"},{id:"1241270881",title:"Real Estate VIII"}]},
+  {key:"realestate",name:"Real Estate",videos:[{id:"1241270552",title:""},{id:"1241270714",title:""},{id:"1241270204",title:""},{id:"1241270283",title:""},{id:"1241270416",title:""},{id:"1241270997",title:""},{id:"1241271146",title:""},{id:"1241270881",title:""}]},
   {key:"events",name:"Events",videos:[{id:"1241272626",title:"NYC"},{id:"1241272502",title:"HASC"},{id:"1241280526",title:"HASC II"},{id:"1241280184",title:"YAMA"},{id:"1241273655",title:"Production"}]},
   {key:"food",name:"Food",videos:[{id:"1241282031",title:"REN"},{id:"1241281237",title:"Drink"},{id:"1241281381",title:"Dish"},{id:"1241281839",title:"Fish"},{id:"1241281619",title:"Dining"},{id:"1241281096",title:"Sol Dining"}]},
-  {key:"eventart",name:"Event Art",videos:[{id:"1241273938",title:"Event Art I"},{id:"1241273386",title:"Event Art II"}]},
+  {key:"eventart",name:"Event Art",videos:[{id:"1241273938",title:""},{id:"1241273386",title:""}]},
   {key:"proposals",name:"Proposals",videos:[{id:"",title:"Rooftop, Jerusalem"},{id:"",title:"Old City at dawn"},{id:"",title:"Sea of Galilee"}]}
 ];
 var DEPTH=[1.0,0.45,0.8,0.3,0.65,0.55];
@@ -243,7 +243,7 @@ requestAnimationFrame(tick);
 var current=null;
 function playInline(box,v){
   stopInline();
-  var f=el('iframe',{src:'https://player.vimeo.com/video/'+v.id+'?autoplay=1&playsinline=1&title=0&byline=0&portrait=0&dnt=1',allow:'autoplay; fullscreen; picture-in-picture',title:v.title});
+  var f=el('iframe',{src:'https://player.vimeo.com/video/'+v.id+'?autoplay=1&playsinline=1&title=0&byline=0&portrait=0&dnt=1',allow:'autoplay; fullscreen; picture-in-picture',title:v.title||'film'});
   box.appendChild(f);box.classList.add('playing');current={box:box,f:f};
 }
 function stopInline(){if(current){current.f.remove();current.box.classList.remove('playing');current=null}}
@@ -265,7 +265,7 @@ function showWall(c){
     }else if(/^[\w-]{11}$/.test(v.youtube||'')){
       box.appendChild(el('iframe',{src:'https://www.youtube-nocookie.com/embed/'+v.youtube+'?autoplay=1&mute=1&loop=1&playlist='+v.youtube+'&controls=0&playsinline=1&rel=0&modestbranding=1',allow:'autoplay; fullscreen; picture-in-picture',title:v.title,loading:'lazy'}));
     }else if(/^\d+$/.test(v.id||'')){
-      var th=el('button',{class:'thumb',type:'button','aria-label':'Play '+v.title});
+      var th=el('button',{class:'thumb',type:'button','aria-label':'Play '+(v.title||c.name)});
       var img=el('img',{alt:'',decoding:'async'});
       th.appendChild(img);th.appendChild(el('span',{class:'play','aria-hidden':'true'},'▶'));
       th.addEventListener('click',function(){playInline(box,v)});
@@ -275,8 +275,7 @@ function showWall(c){
       box.appendChild(el('div',{class:'ph'},'example'));
     }
     r.appendChild(box);
-    var p=el('p');p.appendChild(el('i',{},pad(i+1)));p.appendChild(document.createTextNode(v.title.toLowerCase()));
-    r.appendChild(p);
+    if(v.title){var p=el('p');p.appendChild(el('i',{},pad(i+1)));p.appendChild(document.createTextNode(v.title.toLowerCase()));r.appendChild(p)}
     grid.appendChild(r);
   });
   grid.classList.add('collage');
