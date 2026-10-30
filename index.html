@@ -72,7 +72,19 @@ a:focus-visible,button:focus-visible{outline:1px solid var(--ink);outline-offset
 
 /* Collage: tiles placed by hand-tuned slots, overlapping, the one you touch rises to the top. */
 .reels.collage{display:block;position:relative;max-width:1040px;margin:0 auto}
-.reels.collage .r{position:absolute;transform:none!important;transition:box-shadow .4s ease}
+.reels.collage .r{position:absolute;transform:translate3d(var(--px,0px),var(--py,0px),0)!important;will-change:transform}
+.reels.collage .box{transition:transform .5s cubic-bezier(.2,.7,.2,1),box-shadow .5s ease}
+.reels.collage .box.tilt{transition:transform .12s linear,box-shadow .5s ease;box-shadow:0 1px 0 var(--hair),0 30px 60px -28px rgba(40,35,25,.45)!important}
+.thumb:active .play{transform:translate(-50%,-50%) scale(.88)}
+.thumb .play{transition:transform .25s ease}
+@media (prefers-reduced-motion:no-preference){
+  .reels.collage .r .box{animation:drop .9s cubic-bezier(.2,.7,.2,1) backwards}
+  .reels.collage .r:nth-child(2) .box{animation-delay:.08s}.reels.collage .r:nth-child(3) .box{animation-delay:.16s}
+  .reels.collage .r:nth-child(4) .box{animation-delay:.24s}.reels.collage .r:nth-child(5) .box{animation-delay:.32s}
+  .reels.collage .r:nth-child(6) .box{animation-delay:.4s}.reels.collage .r:nth-child(n+7) .box{animation-delay:.48s}
+  @keyframes drop{from{transform:translateY(18px) rotate(-1.2deg) scale(.97)}to{transform:none}}
+}
+@media (pointer:coarse){.home{touch-action:none}}
 .reels.collage .r .box{box-shadow:0 1px 0 var(--hair),0 18px 40px -24px rgba(40,35,25,.35)}
 .reels.collage .r:hover,.reels.collage .r:focus-within{z-index:20!important}
 .reels.collage .r p{position:absolute;left:0;bottom:0;margin:0;z-index:2;background:var(--paper);display:inline-flex;padding:4px 8px}
@@ -163,13 +175,65 @@ window.addEventListener('pointermove',function(e){
   var t=e.target;dot.classList.toggle('big',!!(t&&t.closest&&t.closest('a')));
 },{passive:true});
 document.addEventListener('pointerleave',function(){tx=ty=0;mx=my=-100});
+/* Phone: tilting the phone moves the layers (gyroscope); a finger drag works too.
+   iPhone asks permission once, on the first tap. */
+var touch=window.matchMedia&&window.matchMedia('(pointer:coarse)').matches,gyro=false;
+function onTilt(e){
+  if(e.gamma==null)return;gyro=true;
+  tx=Math.max(-1,Math.min(1,e.gamma/25));ty=Math.max(-1,Math.min(1,(e.beta-40)/25));
+}
+function startGyro(){
+  try{
+    var D=window.DeviceOrientationEvent;if(!D)return;
+    if(typeof D.requestPermission==='function'){D.requestPermission().then(function(s){if(s==='granted')window.addEventListener('deviceorientation',onTilt)}).catch(function(){})}
+    else window.addEventListener('deviceorientation',onTilt);
+  }catch(e){}
+}
+if(touch){
+  try{if(window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission!=='function')startGyro()}catch(e){}
+  window.addEventListener('touchend',function once(){startGyro();window.removeEventListener('touchend',once)},{passive:true});
+  window.addEventListener('touchmove',function(e){if(gyro)return;var t=e.touches[0];tx=(t.clientX/innerWidth-.5)*2;ty=(t.clientY/innerHeight-.5)*2},{passive:true});
+  window.addEventListener('touchend',function(){if(!gyro){tx=ty=0}},{passive:true});
+}
+
+/* Magnetic pull: near the cursor a category leans toward it. */
+var mag=cats.map(function(){return {x:0,y:0}});
+var sy=0,ssy=0;
+window.addEventListener('scroll',function(){sy=window.scrollY||0},{passive:true});
 function tick(){
   cx+=(tx-cx)*.06;cy+=(ty-cy)*.06;
   dx+=(mx-dx)*.2;dy+=(my-dy)*.2;
-  if(!reduce&&!home.hidden){for(var i=0;i<cats.length;i++){var k=DEPTH[i%DEPTH.length]*22;cats[i].style.transform='translate3d('+(-cx*k).toFixed(2)+'px,'+(-cy*k).toFixed(2)+'px,0)'}}
+  ssy+=(sy-ssy)*.12;
+  if(!reduce&&!home.hidden){
+    for(var i=0;i<cats.length;i++){
+      var a=cats[i],k=DEPTH[i%DEPTH.length]*(touch?30:22);
+      var ccx=a.offsetLeft+a.offsetWidth/2,ccy=a.offsetTop+a.offsetHeight/2,ddx=mx-ccx,ddy=my-ccy,d=Math.sqrt(ddx*ddx+ddy*ddy),m=mag[i];
+      var pull=(!touch&&d<160)?(1-d/160)*.35:0;
+      m.x+=(ddx*pull-m.x)*.15;m.y+=(ddy*pull-m.y)*.15;
+      a.style.transform='translate3d('+(-cx*k+m.x).toFixed(2)+'px,'+(-cy*k+m.y).toFixed(2)+'px,0)';
+    }
+  }
+  if(!reduce&&!wall.hidden){
+    var tiles=wall.querySelectorAll('.reels.collage .r');
+    for(var j=0;j<tiles.length;j++){
+      var z=+tiles[j].style.zIndex||1,px=-cx*z*(touch?5:4),py=-cy*z*(touch?5:4)-ssy*(z-2.5)*.035;
+      tiles[j].style.setProperty('--px',px.toFixed(2)+'px');tiles[j].style.setProperty('--py',py.toFixed(2)+'px');
+    }
+  }
   dot.style.transform='translate3d('+dx.toFixed(1)+'px,'+dy.toFixed(1)+'px,0)';
   requestAnimationFrame(tick);
 }
+
+/* Desktop: a tile tilts toward the cursor like a print lifted off the table. */
+wall.addEventListener('pointermove',function(e){
+  if(reduce||e.pointerType!=='mouse')return;
+  var b=e.target.closest&&e.target.closest('.box');
+  wall.querySelectorAll('.box.tilt').forEach(function(x){if(x!==b){x.classList.remove('tilt');x.style.transform=''}});
+  if(!b||b.classList.contains('playing'))return;
+  var r=b.getBoundingClientRect(),ax=(e.clientX-r.left)/r.width-.5,ay=(e.clientY-r.top)/r.height-.5;
+  b.classList.add('tilt');b.style.transform='perspective(900px) rotateY('+(ax*9).toFixed(2)+'deg) rotateX('+(-ay*9).toFixed(2)+'deg) scale(1.02)';
+});
+wall.addEventListener('pointerleave',function(){wall.querySelectorAll('.box.tilt').forEach(function(x){x.classList.remove('tilt');x.style.transform=''})});
 requestAnimationFrame(tick);
 
 /* A tapped film plays right inside its own tile, with sound; starting another stops the first. */
