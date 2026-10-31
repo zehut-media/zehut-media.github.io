@@ -25,11 +25,18 @@ a:focus-visible,button:focus-visible{outline:1px solid var(--ink);outline-offset
 .about-link::after{content:"";position:absolute;left:0;right:0;bottom:2px;height:1px;background:var(--ink);transform:scaleX(0);transform-origin:right;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
 .about-link:hover::after{transform:scaleX(1)}
 .about{min-height:100%;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:22vh 40vh}
-.about-in{max-width:30rem;margin-left:13vw;display:flex;flex-direction:column;gap:28px}
+.about-grid{display:flex;align-items:flex-end;gap:6vw;margin-left:9vw;flex-wrap:wrap}
+.about-in{max-width:30rem;display:flex;flex-direction:column;gap:28px;min-width:0;flex:1 1 18rem}
+.portrait{position:relative;width:min(30vw,340px);aspect-ratio:9/16;max-width:100%;flex:none;touch-action:pan-y}
+.portrait .s{position:absolute;top:0;bottom:0;background-image:url(me.jpg);background-repeat:no-repeat;filter:grayscale(1) contrast(1.04);transition:filter .7s ease;will-change:transform}
+.portrait .s.c{filter:grayscale(0)}
+.portrait-cap{position:absolute;left:0;bottom:-26px;font-family:var(--type);font-size:11px;letter-spacing:.08em;color:var(--soft)}
+@media (prefers-reduced-motion:no-preference){.portrait .s{animation:hang 1.1s cubic-bezier(.2,.7,.2,1) backwards}@keyframes hang{from{transform:translateY(-36px)}}}
+@media (max-width:640px){.about-grid{margin-left:2vw;gap:56px}.portrait{width:min(64vw,300px)}}
 .about-in h2{margin:0;font-family:var(--type);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--soft)}
 .about-in p{margin:0;font-size:clamp(17px,1.6vw,20px);line-height:1.6;letter-spacing:-.01em;font-weight:400;text-wrap:pretty}
 .about-in .sig{font-family:var(--type);font-size:12px;letter-spacing:.08em;color:var(--soft);line-height:1.9}
-@media (max-width:640px){.about-in{margin-left:4vw}.about{padding-block:16vh 34vh}}
+@media (max-width:640px){.about{padding-block:12vh 34vh}}
 body.in-about .tag,body.in-about .coord{opacity:0;visibility:hidden}
 .coord{position:fixed;right:calc(max(16px,env(safe-area-inset-right,0px)) + 1.5vw);bottom:calc(env(safe-area-inset-bottom,0px) + 3.4vh + 34px);font-family:var(--type);font-size:11px;letter-spacing:.08em;color:var(--soft);text-align:right;line-height:1.7;z-index:3}
 
@@ -133,12 +140,15 @@ body.lb-open .mark{opacity:0;pointer-events:none}
 <main id="home" class="home view" aria-label="Categories"></main>
 <section id="wall" class="wall view" hidden></section>
 <section id="about" class="about view" hidden aria-label="About">
+  <div class="about-grid">
+  <div class="portrait" id="portrait" role="img" aria-label="Shraga Hollander, New York"><span class="portrait-cap">new york</span></div>
   <div class="about-in">
     <h2>about</h2>
     <p>ZEHUT is a small creative studio in Jerusalem, led by Shraga Hollander.</p>
     <p>We make short films for fashion, real estate, events, food and the moments people want to keep.</p>
     <p>Zehut is Hebrew for identity. Every film starts there: who you are, said quietly and clearly.</p>
     <div class="sig">jerusalem · working in hebrew and english</div>
+  </div>
   </div>
 </section>
 
@@ -246,6 +256,36 @@ function tick(){
   dot.style.transform='translate3d('+dx.toFixed(1)+'px,'+dy.toFixed(1)+'px,0)';
   requestAnimationFrame(tick);
 }
+
+/* About portrait: a noren curtain. The photo hangs in strips; near the cursor or finger the strips part
+   and turn to colour. Tilting the phone sways them at different depths. */
+var portrait=document.getElementById('portrait'),N=16,strips=[],sxs=[],lp=-1;
+for(var q=0;q<N;q++){
+  var st=document.createElement('div');st.className='s';
+  st.style.left=(q*100/N)+'%';st.style.width='calc('+(100/N)+'% + 1px)';
+  st.style.backgroundSize=(N*100)+'% 100%';st.style.backgroundPosition=(q/(N-1)*100)+'% 0';
+  st.style.animationDelay=(q*0.045)+'s';
+  portrait.appendChild(st);strips.push(st);sxs.push(0);
+}
+function localX(x,y){var r=portrait.getBoundingClientRect();if(!r.width||y<r.top-40||y>r.bottom+40||x<r.left-60||x>r.right+60)return -1;return (x-r.left)/r.width}
+window.addEventListener('pointermove',function(e){if(!portrait.offsetParent)return;lp=localX(e.clientX,e.clientY)},{passive:true});
+portrait.addEventListener('touchstart',function(e){var t=e.touches[0];lp=localX(t.clientX,t.clientY)},{passive:true});
+portrait.addEventListener('touchmove',function(e){var t=e.touches[0];lp=localX(t.clientX,t.clientY)},{passive:true});
+portrait.addEventListener('touchend',function(){setTimeout(function(){lp=-1},900)},{passive:true});
+function curtain(){
+  if(portrait.offsetParent&&!reduce){
+    for(var i=0;i<N;i++){
+      var ci=(i+.5)/N,d=lp>=0?ci-lp:9,ad=Math.abs(d),R=.2;
+      var push=ad<R?(d<0?-1:1)*(1-ad/R)*22:0;
+      sxs[i]+=(push-sxs[i])*.14;
+      var sway=Math.sin(i*1.9)*cy*9+Math.cos(i*.7)*cx*5;
+      strips[i].style.transform='translate3d('+sxs[i].toFixed(2)+'px,'+sway.toFixed(2)+'px,0)';
+      strips[i].classList.toggle('c',ad<.14);
+    }
+  }
+  requestAnimationFrame(curtain);
+}
+requestAnimationFrame(curtain);
 
 /* Desktop: a tile tilts toward the cursor like a print lifted off the table. */
 wall.addEventListener('pointermove',function(e){
