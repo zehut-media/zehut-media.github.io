@@ -139,6 +139,25 @@ body.arranging .rs{display:block;position:absolute;right:-8px;bottom:-8px;width:
 .ed-foot{display:flex;gap:14px;align-items:center;padding-top:8px;border-top:1px solid var(--hair);margin-top:6px}
 body.editing .about-link{bottom:calc(env(safe-area-inset-bottom,0px) + 3.4vh + 120px)}
 body.editing .wall{padding-bottom:70vh}
+
+/* Hebrew mirrors the page: every corner and category swaps sides. */
+html[dir="rtl"] .p1{left:auto;right:14%}
+html[dir="rtl"] .p2{left:auto;right:50%}
+html[dir="rtl"] .p3{left:auto;right:73%}
+html[dir="rtl"] .p4{left:auto;right:27%}
+html[dir="rtl"] .p5{left:auto;right:55%}
+html[dir="rtl"] .p6{left:auto;right:76%}
+@media (max-width:640px){html[dir="rtl"] .p1{left:auto;right:8%}html[dir="rtl"] .p2{left:auto;right:46%}html[dir="rtl"] .p3{left:auto;right:14%}html[dir="rtl"] .p4{left:auto;right:52%}html[dir="rtl"] .p5{left:auto;right:10%}html[dir="rtl"] .p6{left:auto;right:44%}}
+html[dir="rtl"] .mark{left:auto;right:calc(max(16px,env(safe-area-inset-right,0px)) + 1.5vw)}
+html[dir="rtl"] .tag{right:auto;left:calc(max(16px,env(safe-area-inset-left,0px)) + 1.5vw)}
+html[dir="rtl"] .lang{left:auto;right:calc(max(16px,env(safe-area-inset-right,0px)) + 1.5vw)}
+html[dir="rtl"] .coord,html[dir="rtl"] .about-link{right:auto;left:calc(max(16px,env(safe-area-inset-left,0px)) + 1.5vw);text-align:left}
+html[dir="rtl"] .about-link::after{transform-origin:left}
+html[dir="rtl"] .lang::after,html[dir="rtl"] .cat::after{transform-origin:right}
+html[dir="rtl"] .r p{left:auto;right:0}
+html[dir="rtl"] body.arranging .rs{right:auto;left:-8px}
+html[dir="rtl"] .ed{direction:ltr}
+html[dir="rtl"] .cat{letter-spacing:.02em}
 </style>
 <style>body{margin:0}</style>
 </head>
@@ -181,7 +200,7 @@ var T={
   en:{tag:"creative agency",coord:"jerusalem<br>31.77° n · 35.21° e",about:"about",close:"close",aboutH:"about",films:" films",back:"← back",
       text:["ZEHUT is a creative studio focused on brand storytelling, visual content, and digital presence.","I work with businesses to turn ideas into compelling stories through strategy, creative direction, and film.","Based in Israel, working with brands in Israel and the US.","I believe every business has a story worth telling. My job is to find the right way to tell it."],
       cap:"shraga hollander",contactH:"contact",wa:"whatsapp"},
-  he:{tag:"סטודיו לתוכן",coord:"ירושלים<br>31.77° n · 35.21° e",about:"אודות",close:"סגירה",aboutH:"אודות",films:" סרטים",back:"חזרה →",
+  he:{tag:"סטודיו לתוכן",coord:"ירושלים<br><span dir=\"ltr\">31.77° n · 35.21° e</span>",about:"אודות",close:"סגירה",aboutH:"אודות",films:" סרטים",back:"חזרה →",
       text:["ZEHUT הוא סטודיו קריאייטיב שמתמקד בסיפור מותג, בתוכן ויזואלי ובנוכחות דיגיטלית.","אני עובד עם עסקים והופך רעיונות לסיפורים שתופסים, דרך אסטרטגיה, הכוונה קריאייטיבית ווידאו.","מבוסס בישראל, ועובד עם מותגים בישראל ובארצות הברית.","אני מאמין שלכל עסק יש סיפור ששווה לספר. התפקיד שלי הוא למצוא את הדרך הנכונה לספר אותו."],
       cap:"שרגא הולנדר",contactH:"צרו קשר",wa:"וואטסאפ"}
 };
@@ -212,6 +231,7 @@ function nameOf(c){return c[LANG]}
 
 var cats=[],mag=[];
 function isPhone(){return window.innerWidth<=640}
+function RTL(){return LANG==='he'}
 /* Home: each category sits in its default spot, or where it was dragged in the editor. */
 function buildHome(){
   home.textContent='';
@@ -220,8 +240,9 @@ function buildHome(){
     a.appendChild(el('i',{},pad(i+1)));
     a.appendChild(el('b',{style:'font-weight:400'},nameOf(c)));
     var P=isPhone()?c.mpos:c.pos;
-    if(P){a.style.top=P.t+'%';a.style.left=P.l+'%'}
-    else if(i>=6){a.style.top=(14+(i*11)%58)+'%';a.style.left=(6+(i*37)%66)+'%'}
+    var side=RTL()?'right':'left';
+    if(P){a.style.top=P.t+'%';a.style[side]=P.l+'%'}
+    else if(i>=6){a.style.top=(14+(i*11)%58)+'%';a.style[side]=(6+(i*37)%66)+'%'}
     home.appendChild(a);
   });
   cats=[].slice.call(home.querySelectorAll('.cat'));
@@ -232,7 +253,7 @@ buildHome();
 /* Language: one small switch, top left. Hebrew keeps the same fonts and drops film titles. */
 function applyLang(){
   var t=T[LANG];
-  document.documentElement.lang=LANG;
+  document.documentElement.lang=LANG;document.documentElement.dir=RTL()?'rtl':'ltr';
   document.getElementById('tag').textContent=t.tag;
   document.getElementById('coord').innerHTML=t.coord;
   document.getElementById('aboutH').textContent=t.aboutH;
@@ -377,7 +398,7 @@ function layout(){
     var v=curCat.videos[i]||{},P=phone?v.mpos:v.pos,s;
     if(P)s=P;else{var q=S[i%n],round=Math.floor(i/n),step=phone?420:190;s={l:q.l,t:q.t+round*step,w:q.w,z:q.z}}
     var top=s.t*W/100,w=s.w*W/100,h=w*16/9;
-    var r=tiles[i];r.style.left=(s.l*W/100)+'px';r.style.top=top+'px';r.style.width=w+'px';r.style.zIndex=s.z;
+    var r=tiles[i];r.style.left=(RTL()?W-(s.l+s.w)*W/100:s.l*W/100)+'px';r.style.top=top+'px';r.style.width=w+'px';r.style.zIndex=s.z;
     bottom=Math.max(bottom,top+h+40);
   }
   g.style.height=bottom+'px';
@@ -497,29 +518,29 @@ function renderEditor(){
 var drag=null;
 function freezeTiles(){
   var g=wall.querySelector('.reels.collage');if(!g||!curCat)return;var W=g.clientWidth,k=isPhone()?'mpos':'pos';
-  [].forEach.call(g.querySelectorAll('.r'),function(r){var v=curCat.videos[+r.getAttribute('data-i')];if(v&&!v[k])v[k]={l:r.offsetLeft/W*100,t:r.offsetTop/W*100,w:r.offsetWidth/W*100,z:+r.style.zIndex||1}});
+  [].forEach.call(g.querySelectorAll('.r'),function(r){var v=curCat.videos[+r.getAttribute('data-i')];if(v&&!v[k])v[k]={l:(RTL()?W-r.offsetLeft-r.offsetWidth:r.offsetLeft)/W*100,t:r.offsetTop/W*100,w:r.offsetWidth/W*100,z:+r.style.zIndex||1}});
 }
 document.addEventListener('pointerdown',function(e){
   if(!ARR)return;
   var cat=e.target.closest&&e.target.closest('.home .cat'),tile=e.target.closest&&e.target.closest('.reels.collage .r');
-  if(cat){e.preventDefault();var i=+cat.getAttribute('data-i');drag={type:'cat',elx:cat,c:CATS[i],sx:e.clientX,sy:e.clientY,ox:cat.offsetLeft,oy:cat.offsetTop,moved:false};cat.style.transform='none'}
+  if(cat){e.preventDefault();var i=+cat.getAttribute('data-i');drag={type:'cat',elx:cat,c:CATS[i],sx:e.clientX,sy:e.clientY,ox:RTL()?home.clientWidth-cat.offsetLeft-cat.offsetWidth:cat.offsetLeft,oy:cat.offsetTop,moved:false};cat.style.transform='none'}
   else if(tile){
     e.preventDefault();freezeTiles();
     var v=curCat.videos[+tile.getAttribute('data-i')],k=isPhone()?'mpos':'pos';
-    drag={type:e.target.classList.contains('rs')?'size':'tile',elx:tile,v:v,k:k,sx:e.clientX,sy:e.clientY,ox:tile.offsetLeft,oy:tile.offsetTop,ow:tile.offsetWidth,moved:false};
+    drag={type:e.target.classList.contains('rs')?'size':'tile',elx:tile,v:v,k:k,sx:e.clientX,sy:e.clientY,ox:RTL()?tile.parentNode.clientWidth-tile.offsetLeft-tile.offsetWidth:tile.offsetLeft,oy:tile.offsetTop,ow:tile.offsetWidth,moved:false};
   }else return;
   try{drag.elx.setPointerCapture(e.pointerId)}catch(err){}
 },{passive:false});
 document.addEventListener('pointermove',function(e){
   if(!drag)return;
-  var ddx=e.clientX-drag.sx,ddy=e.clientY-drag.sy;if(Math.abs(ddx)+Math.abs(ddy)>4)drag.moved=true;if(!drag.moved)return;
+  var ddx=e.clientX-drag.sx,ddy=e.clientY-drag.sy,sdx=RTL()?-ddx:ddx;if(Math.abs(ddx)+Math.abs(ddy)>4)drag.moved=true;if(!drag.moved)return;
   if(drag.type==='cat'){
-    var W=home.clientWidth,H=home.clientHeight,l=Math.max(0,Math.min(92,(drag.ox+ddx)/W*100)),t=Math.max(2,Math.min(90,(drag.oy+ddy)/H*100));
-    drag.elx.style.left=l+'%';drag.elx.style.top=t+'%';drag.c[isPhone()?'mpos':'pos']={l:+l.toFixed(2),t:+t.toFixed(2)};
+    var W=home.clientWidth,H=home.clientHeight,l=Math.max(0,Math.min(92,(drag.ox+sdx)/W*100)),t=Math.max(2,Math.min(90,(drag.oy+ddy)/H*100));
+    drag.elx.style[RTL()?'right':'left']=l+'%';drag.elx.style.top=t+'%';drag.c[isPhone()?'mpos':'pos']={l:+l.toFixed(2),t:+t.toFixed(2)};
   }else{
     var g=wall.querySelector('.reels.collage'),GW=g.clientWidth,P=drag.v[drag.k];
-    if(drag.type==='tile'){P.l=+Math.max(-5,Math.min(95,(drag.ox+ddx)/GW*100)).toFixed(2);P.t=+Math.max(0,(drag.oy+ddy)/GW*100).toFixed(2)}
-    else{P.w=+Math.max(12,Math.min(80,(drag.ow+ddx)/GW*100)).toFixed(2)}
+    if(drag.type==='tile'){P.l=+Math.max(-5,Math.min(95,(drag.ox+sdx)/GW*100)).toFixed(2);P.t=+Math.max(0,(drag.oy+ddy)/GW*100).toFixed(2)}
+    else{P.w=+Math.max(12,Math.min(80,(drag.ow+sdx)/GW*100)).toFixed(2)}
     layout();
   }
 });
