@@ -159,6 +159,27 @@ html[dir="rtl"] .r p{left:auto;right:0}
 html[dir="rtl"] body.arranging .rs{right:auto;left:-8px}
 html[dir="rtl"] .ed{direction:ltr}
 html[dir="rtl"] .cat{letter-spacing:.02em}
+
+/* Large film page */
+.open{position:absolute;top:8px;right:8px;z-index:4;width:32px;height:32px;border-radius:50%;background:var(--paper);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;opacity:.9;transition:opacity .3s,transform .3s}
+.open:hover{transform:scale(1.08);opacity:1}
+@media (hover:hover){.r .open{opacity:0}.r:hover .open,.open:focus-visible{opacity:.92}}
+html[dir="rtl"] .open{right:auto;left:8px}
+body.playing-any .open{opacity:.92}
+body.arranging .open{display:none}
+.film{min-height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:18px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:calc(env(safe-area-inset-top,0px) + 9vh) 14vh;position:relative;z-index:4}
+.film-bar{width:min(100%,calc(min(78vh,(100vw - 32px)*16/9)*9/16 + 120px));display:flex;justify-content:space-between;align-items:baseline;font-family:var(--type);font-size:12px;letter-spacing:.08em}
+.film-back{color:var(--ink);position:relative;padding:4px 0}
+.film-n{color:var(--soft);font-size:11px}
+.film-stage{display:flex;align-items:center;gap:clamp(10px,3vw,40px);max-width:100%}
+.film-frame{position:relative;height:min(78vh,calc((100vw - 32px)*16/9));aspect-ratio:9/16;max-width:calc(100vw - 32px);background:var(--ink);box-shadow:0 1px 0 var(--hair),0 40px 80px -40px rgba(30,25,15,.55)}
+.film-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.film-nav{font-family:var(--type);font-size:18px;color:var(--soft);padding:12px;transition:color .3s}
+.film-nav:hover{color:var(--ink)}
+.film-t{margin:0;font-family:var(--type);font-size:12px;letter-spacing:.06em;color:var(--soft)}
+@media (max-width:640px){.film{padding-block:calc(env(safe-area-inset-top,0px) + 10vh) 22vh}.film-frame{height:min(64vh,calc((100vw - 32px)*16/9))}.film-bar{width:100%}.film-stage{position:relative}.film-nav{position:absolute;bottom:-46px}.film-nav.prev{left:0}.film-nav.next{right:0}html[dir="rtl"] .film-nav.prev{left:auto;right:0}html[dir="rtl"] .film-nav.next{right:auto;left:0}}
+body.in-film .tag,body.in-film .coord{opacity:0;visibility:hidden}
+body.in-film .mark{opacity:.1;pointer-events:none}
 </style>
 <style>body{margin:0}</style>
 </head>
@@ -173,6 +194,7 @@ html[dir="rtl"] .cat{letter-spacing:.02em}
 
 <main id="home" class="home view" aria-label="Categories"></main>
 <section id="wall" class="wall view" hidden></section>
+<section id="film" class="film view" hidden aria-label="Film"></section>
 <section id="about" class="about view" hidden aria-label="About">
   <div class="about-grid">
     <div class="figure"><img id="avatar" src="sketch.png" alt="Shraga Hollander, pencil portrait" width="200" height="200"><span id="figcap">shraga hollander</span></div>
@@ -375,6 +397,8 @@ function showWall(c){
     box.appendChild(th);loadThumb(v.id,img);
     r.appendChild(box);
     if(v.title&&LANG==='en'){var p=el('p');p.appendChild(el('i',{},pad(i+1)));p.appendChild(document.createTextNode(v.title.toLowerCase()));r.appendChild(p)}
+    var op=el('a',{class:'open',href:'#film-'+v.id,'aria-label':LANG==='he'?'צפייה בגדול':'Watch large',title:LANG==='he'?'צפייה בגדול':'Watch large'},'⤢');
+    r.appendChild(op);
     r.appendChild(el('span',{class:'rs','aria-hidden':'true'}));
     grid.appendChild(r);
   });
@@ -406,10 +430,44 @@ function layout(){
 }
 window.addEventListener('resize',function(){layout();if(!home.hidden)buildHome()});
 
+
+/* Large view: one film on its own page, with its category around it.
+   The link (#film-<number>) can be sent to a client as is. */
+function findFilm(id){for(var i=0;i<CATS.length;i++){var vs=CATS[i].videos;for(var j=0;j<vs.length;j++)if(vs[j].id===id)return {c:CATS[i],i:j}}return null}
+function showFilm(h){
+  var f=document.getElementById('film'),c=h.c,v=c.videos[h.i],n=c.videos.length,he=LANG==='he';
+  f.textContent='';
+  var bar=el('div',{class:'film-bar'});
+  bar.appendChild(el('a',{class:'film-back',href:'#'+c.key},he?'חזרה ל'+nameOf(c)+' →':'← '+nameOf(c).toLowerCase()));
+  bar.appendChild(el('span',{class:'film-n'},pad(h.i+1)+' / '+pad(n)));
+  f.appendChild(bar);
+  var stage=el('div',{class:'film-stage'});
+  var prev=c.videos[(h.i-1+n)%n],next=c.videos[(h.i+1)%n];
+  var pa=el('a',{class:'film-nav prev',href:'#film-'+prev.id,'aria-label':he?'הקודם':'Previous'},he?'→':'←');
+  var na=el('a',{class:'film-nav next',href:'#film-'+next.id,'aria-label':he?'הבא':'Next'},he?'←':'→');
+  var fr=el('div',{class:'film-frame'});
+  fr.appendChild(el('iframe',{src:'https://player.vimeo.com/video/'+v.id+'?autoplay=1&playsinline=1&title=0&byline=0&portrait=0&dnt=1',allow:'autoplay; fullscreen; picture-in-picture',allowfullscreen:'',title:v.title||nameOf(c)}));
+  if(n>1)stage.appendChild(pa);stage.appendChild(fr);if(n>1)stage.appendChild(na);
+  f.appendChild(stage);
+  if(v.title&&!he)f.appendChild(el('p',{class:'film-t'},v.title.toLowerCase()));
+}
+document.addEventListener('keydown',function(e){
+  if(document.getElementById('film').hidden)return;
+  var t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))return;
+  var a=null;
+  if(e.key==='Escape')a=document.querySelector('.film-back');
+  else if(e.key==='ArrowRight')a=document.querySelector(RTL()?'.film-nav.prev':'.film-nav.next');
+  else if(e.key==='ArrowLeft')a=document.querySelector(RTL()?'.film-nav.next':'.film-nav.prev');
+  if(a){e.preventDefault();location.hash=a.getAttribute('href').slice(1)}
+});
 function route(keep){
   var k=location.hash.slice(1),c=null;
   if(k==='edit'){setEditing(true);history.replaceState(null,'',location.pathname+location.search);k=''}
   for(var i=0;i<CATS.length;i++)if(CATS[i].key===k)c=CATS[i];
+  var filmEl=document.getElementById('film'),fm=/^film-(\d+)$/.exec(k),hit=fm?findFilm(fm[1]):null;
+  filmEl.hidden=!hit;document.body.classList.toggle('in-film',!!hit);
+  if(hit){stopInline();showFilm(hit);wall.hidden=true;home.hidden=true;document.getElementById('about').hidden=true;document.body.classList.remove('in-wall','in-about');window.scrollTo(0,0);if(typeof renderEditor==='function')renderEditor();return}
+  else filmEl.textContent='';
   var aboutEl=document.getElementById('about'),al=document.getElementById('aboutLink'),isAbout=k==='about',wasAbout=!aboutEl.hidden,t=T[LANG];
   aboutEl.hidden=!isAbout;document.body.classList.toggle('in-about',isAbout);
   al.textContent=isAbout?t.close:t.about;al.setAttribute('href',isAbout?'#':'#about');
