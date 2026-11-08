@@ -10,7 +10,7 @@
    language switch top-left, about bottom-right, typewritten category notes placed loosely in reading order.
    A category opens a quiet overlapping collage. Single light look by design. */
 :root{
-  --paper:#fbfaf7;--ink:#111111;--soft:#9a9a94;--hair:#e6e4de;--tile:#f1efea;
+  --paper:#fbfaf7;--ink:#111111;--soft:#6f6e68;--hair:#e6e4de;--tile:#f1efea;
   --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
   --type:"Zehut Hebrew","Courier Prime","Cousine","Courier New",Courier,ui-monospace,monospace;
   color-scheme:light;
@@ -180,31 +180,87 @@ body.arranging .open{display:none}
 @media (max-width:640px){.film{padding-block:calc(env(safe-area-inset-top,0px) + 10vh) 22vh}.film-frame{height:min(64vh,calc((100vw - 32px)*16/9))}.film-bar{width:100%}.film-stage{position:relative}.film-nav{position:absolute;bottom:-46px}.film-nav.prev{left:0}.film-nav.next{right:0}html[dir="rtl"] .film-nav.prev{left:auto;right:0}html[dir="rtl"] .film-nav.next{right:auto;left:0}}
 body.in-film .tag,body.in-film .coord{opacity:0;visibility:hidden}
 body.in-film .mark{opacity:.1;pointer-events:none}
+
+/* Accessibility: skip link, screen-reader heading, settings panel, statement pages and user settings. */
+.sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skip{position:fixed;left:12px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:200;background:var(--ink);color:var(--paper);padding:10px 14px;font-family:var(--type);font-size:13px;transform:translateY(-200%);transition:transform .2s}
+.skip:focus{transform:none}
+html[dir="rtl"] .skip{left:auto;right:12px}
+#main:focus{outline:none}
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--ink)!important;outline-offset:3px}
+.topl{position:fixed;left:calc(max(16px,env(safe-area-inset-left,0px)) + 1.5vw);top:calc(env(safe-area-inset-top,0px) + 4vh);z-index:6;display:flex;align-items:baseline;gap:18px}
+.topl .lang{position:static}
+html[dir="rtl"] .topl{left:auto;right:calc(max(16px,env(safe-area-inset-right,0px)) + 1.5vw)}
+.a11y-btn{background:none;border:0;padding:6px 0;font-family:var(--type);font-size:12px;letter-spacing:.14em;color:var(--ink);cursor:pointer;position:relative}
+.a11y-btn::after{content:"";position:absolute;left:0;right:0;bottom:2px;height:1px;background:var(--ink);transform:scaleX(.3);transform-origin:left;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+html[dir="rtl"] .a11y-btn::after{transform-origin:right}
+.a11y-btn:hover::after,.a11y-btn[aria-expanded="true"]::after{transform:scaleX(1)}
+.a11y-panel{position:fixed;left:calc(max(16px,env(safe-area-inset-left,0px)) + 1.5vw);top:calc(env(safe-area-inset-top,0px) + 4vh + 40px);z-index:120;background:var(--paper);border:1px solid var(--ink);padding:16px;width:min(280px,calc(100vw - 32px));box-sizing:border-box;display:flex;flex-direction:column;gap:6px;font-family:var(--type);box-shadow:0 24px 50px -30px rgba(30,25,15,.5)}
+html[dir="rtl"] .a11y-panel{left:auto;right:calc(max(16px,env(safe-area-inset-right,0px)) + 1.5vw)}
+.a11y-panel h2{margin:0 0 6px;font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--soft)}
+.a11y-opt{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;background:none;border:1px solid var(--hair);padding:10px 12px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer;text-align:start}
+.a11y-opt::after{content:"";width:12px;height:12px;border:1px solid var(--ink);flex:none}
+.a11y-opt[aria-pressed="true"]{border-color:var(--ink)}
+.a11y-opt[aria-pressed="true"]::after{background:var(--ink)}
+.a11y-row{display:flex;justify-content:space-between;gap:10px;margin-top:6px;flex-wrap:wrap}
+.a11y-link{background:none;border:0;padding:6px 0;font:inherit;font-size:12px;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.docpage{min-height:100%;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16vh 30vh;position:relative;z-index:4}
+.doc-in{max-width:40rem;margin:0 auto;font-family:var(--type);font-size:14px;line-height:1.8}
+.doc-in h2{font-weight:400;font-size:clamp(20px,3vw,26px);letter-spacing:-.01em;margin:0 0 18px}
+.doc-in h3{font-weight:700;font-size:13px;letter-spacing:.04em;margin:28px 0 8px}
+.doc-in p{margin:0 0 10px}
+.doc-in ul{margin:0;padding-inline-start:20px}
+.doc-in li{margin:0 0 6px}
+.doc-back{display:inline-block;margin-top:34px;font-size:12px;letter-spacing:.08em;text-decoration:underline;text-underline-offset:3px}
+body.in-doc .tag,body.in-doc .coord{opacity:0;visibility:hidden}
+body.in-doc .mark{opacity:.08;pointer-events:none}
+.legal-links{font-size:11px;letter-spacing:.04em;color:var(--soft);display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.legal-links a{text-decoration:underline;text-underline-offset:3px;color:var(--soft)}
+/* user settings */
+html.a11y-big body{zoom:1.22}
+html.a11y-contrast{--soft:#111111;--hair:#111111;--tile:#e9e9e9;--paper:#ffffff}
+html.a11y-contrast body{background-image:none!important;background-color:#ffffff}
+html.a11y-contrast .home:has(.cat:hover) .cat:not(:hover){opacity:1}
+html.a11y-contrast body.in-about .mark,html.a11y-contrast body.in-film .mark{opacity:.2}
+html.a11y-contrast body.in-doc .mark{opacity:.06}
+html.a11y-still *,html.a11y-still *::before,html.a11y-still *::after{animation:none!important;transition:none!important}
+html.a11y-still .cat,html.a11y-still .reels.collage .r{transform:none!important}
+html.a11y-still .dot{display:none}
+html.a11y-links a{text-decoration:underline!important;text-underline-offset:3px}
+html.a11y-plain{--type:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif}
+@media (prefers-reduced-motion:reduce){.skip{transition:none}}
 </style>
 <style>body{margin:0}</style>
 </head>
 <body>
 
+<a class="skip" href="#main" id="skip">skip to content</a>
+<h1 class="sr" id="h1">ZEHUT, creative agency</h1>
 <a class="mark" href="#" aria-label="ZEHUT, home">ZEHUT</a>
 <div class="tag" id="tag">creative agency</div>
-<button class="lang" id="lang" type="button" aria-label="Switch language"><span data-l="en">en</span><span data-l="he">עב</span></button>
+<div class="topl"><button class="lang" id="lang" type="button" aria-label="Switch language: English / עברית"><span data-l="en" lang="en">en</span><span data-l="he" lang="he">עב</span></button><button class="a11y-btn" id="a11yBtn" type="button" aria-haspopup="dialog" aria-controls="a11yPanel" aria-expanded="false">accessibility</button></div>
+<div class="a11y-panel" id="a11yPanel" role="dialog" aria-modal="false" aria-labelledby="a11yTitle" hidden></div>
 <div class="coord" id="coord">jerusalem<br>31.77° n · 35.21° e</div>
 <a class="about-link" id="aboutLink" href="#about">about</a>
 <div class="dot" id="dot" aria-hidden="true"></div>
 
-<main id="home" class="home view" aria-label="Categories"></main>
+<main id="main" tabindex="-1">
+<nav id="home" class="home view" aria-label="Categories"></nav>
 <section id="wall" class="wall view" hidden></section>
 <section id="film" class="film view" hidden aria-label="Film"></section>
+<section id="docpage" class="docpage view" hidden></section>
 <section id="about" class="about view" hidden aria-label="About">
   <div class="about-grid">
     <div class="figure"><img id="avatar" src="sketch.png" alt="Shraga Hollander, pencil portrait" width="200" height="200"><span id="figcap">shraga hollander</span></div>
     <div class="about-in">
       <h2 id="aboutH">about</h2>
       <div id="aboutText"></div>
-      <div class="contact"><small id="contactH">contact</small><span id="waLabel">whatsapp</span><a id="wa" href="https://wa.me/972586487601" target="_blank" rel="noopener">+972 58-648-7601</a></div>
+      <div class="contact"><small id="contactH">contact</small><span id="waLabel">whatsapp</span><a id="wa" href="https://wa.me/972586487601" target="_blank" rel="noopener" aria-label="WhatsApp +972 58-648-7601 (opens in a new tab)">+972 58-648-7601</a></div>
+      <div class="legal-links" id="legalLinks"></div>
     </div>
   </div>
 </section>
+</main>
 
 <script>
 /* Edit here: the page follows this order. Each video is a Vimeo number; title "" shows no caption.
@@ -222,10 +278,10 @@ var CATS=[
 var T={
   en:{tag:"creative agency",coord:"jerusalem<br>31.77° n · 35.21° e",about:"about",close:"close",aboutH:"about",films:" films",back:"← back",
       text:["ZEHUT is a creative studio focused on brand storytelling, visual content, and digital presence.","I work with businesses to turn ideas into compelling stories through strategy, creative direction, and film.","Based in Israel, working with brands in Israel and the US.","I believe every business has a story worth telling. My job is to find the right way to tell it."],
-      cap:"shraga hollander",contactH:"contact",wa:"whatsapp"},
+      cap:"shraga hollander",contactH:"contact",wa:"whatsapp",a11y:"accessibility",skip:"skip to content",play:"Play film",h1:"ZEHUT, creative agency",legal:"accessibility · privacy"},
   he:{tag:"סטודיו לתוכן",coord:"ירושלים<br><span dir=\"ltr\">31.77° n · 35.21° e</span>",about:"אודות",close:"סגירה",aboutH:"אודות",films:" סרטים",back:"חזרה →",
       text:["ZEHUT הוא סטודיו קריאייטיב שמתמקד בסיפור מותג, בתוכן ויזואלי ובנוכחות דיגיטלית.","אני עובד עם עסקים והופך רעיונות לסיפורים שתופסים, דרך אסטרטגיה, הכוונה קריאייטיבית ווידאו.","מבוסס בישראל, ועובד עם מותגים בישראל ובארצות הברית.","אני מאמין שלכל עסק יש סיפור ששווה לספר. התפקיד שלי הוא למצוא את הדרך הנכונה לספר אותו."],
-      cap:"שרגא הולנדר",contactH:"צרו קשר",wa:"וואטסאפ"}
+      cap:"שרגא הולנדר",contactH:"צרו קשר",wa:"וואטסאפ",a11y:"נגישות",skip:"דלג לתוכן",play:"ניגון סרט",h1:"ZEHUT, סטודיו לתוכן",legal:"נגישות · פרטיות"}
 };
 var LANG='en';
 try{var saved=localStorage.getItem('zehut-lang');if(saved==='he'||saved==='en')LANG=saved}catch(e){}
@@ -287,6 +343,9 @@ function applyLang(){
   t.text.forEach(function(s){at.appendChild(el('p',{},s))});
   buildHome();
   [].forEach.call(document.querySelectorAll('#lang span'),function(s){s.classList.toggle('on',s.getAttribute('data-l')===LANG)});
+  document.getElementById('a11yBtn').textContent=t.a11y;document.getElementById('skip').textContent=t.skip;document.getElementById('h1').textContent=t.h1;
+  var lk=document.getElementById('legalLinks');if(lk){lk.textContent='';lk.appendChild(el('a',{href:'#accessibility'},LANG==='he'?'הצהרת נגישות':'accessibility statement'));lk.appendChild(document.createTextNode(' · '));lk.appendChild(el('a',{href:'#privacy'},LANG==='he'?'פרטיות ותנאי שימוש':'privacy and terms'))}
+  if(a11yOpen)renderA11y();
   route(true);
 }
 document.getElementById('lang').addEventListener('click',function(){
@@ -390,7 +449,7 @@ function showWall(c){
   var grid=el('div',{class:'reels collage'});
   c.videos.forEach(function(v,i){
     var r=el('div',{class:'r','data-i':i}),box=el('div',{class:'box'});
-    var th=el('button',{class:'thumb',type:'button','aria-label':'Play'});
+    var th=el('button',{class:'thumb',type:'button','aria-label':T[LANG].play+' '+(i+1)+(v.title&&LANG==='en'?', '+v.title:'')+' · '+nameOf(c)});
     var img=el('img',{alt:'',decoding:'async'});
     th.appendChild(img);th.appendChild(el('span',{class:'play','aria-hidden':'true'},'▶'));
     th.addEventListener('click',function(){if(!ARR)playInline(box,v)});
@@ -460,20 +519,114 @@ document.addEventListener('keydown',function(e){
   else if(e.key==='ArrowLeft')a=document.querySelector(RTL()?'.film-nav.next':'.film-nav.prev');
   if(a){e.preventDefault();location.hash=a.getAttribute('href').slice(1)}
 });
+/* ---------- Accessibility: settings panel, page titles, statement and privacy pages ---------- */
+var A11Y={big:false,contrast:false,still:false,links:false,plain:false},a11yOpen=false;
+try{var a11ySaved=JSON.parse(localStorage.getItem('zehut-a11y')||'null');if(a11ySaved)for(var ak in A11Y)A11Y[ak]=!!a11ySaved[ak]}catch(e){}
+function applyA11y(){
+  var r=document.documentElement;
+  for(var k in A11Y)r.classList.toggle('a11y-'+k,A11Y[k]);
+  if(A11Y.still)reduce=true;else reduce=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  try{localStorage.setItem('zehut-a11y',JSON.stringify(A11Y))}catch(e){}
+  if(typeof layout==='function'&&!wall.hidden)layout();
+}
+var A11Y_LABELS={
+  en:{title:'Accessibility',big:'Larger text',contrast:'High contrast',still:'Stop motion',links:'Underline links',plain:'Plain font',reset:'Reset',close:'Close',statement:'Accessibility statement'},
+  he:{title:'נגישות',big:'הגדלת טקסט',contrast:'ניגודיות גבוהה',still:'עצירת תנועה',links:'הדגשת קישורים',plain:'גופן פשוט',reset:'איפוס',close:'סגירה',statement:'הצהרת נגישות'}
+};
+var a11yBtn=document.getElementById('a11yBtn'),a11yPanel=document.getElementById('a11yPanel');
+function renderA11y(){
+  var L2=A11Y_LABELS[LANG];a11yPanel.textContent='';
+  a11yPanel.setAttribute('dir',LANG==='he'?'rtl':'ltr');
+  a11yPanel.appendChild(el('h2',{id:'a11yTitle'},L2.title));
+  ['big','contrast','still','links','plain'].forEach(function(k){
+    var b=el('button',{type:'button',class:'a11y-opt','aria-pressed':String(A11Y[k]),id:'a11y-'+k},L2[k]);
+    b.addEventListener('click',function(){A11Y[k]=!A11Y[k];applyA11y();b.setAttribute('aria-pressed',String(A11Y[k]))});
+    a11yPanel.appendChild(b);
+  });
+  var row=el('div',{class:'a11y-row'});
+  var rs=el('button',{type:'button',class:'a11y-link'},L2.reset);rs.addEventListener('click',function(){for(var k in A11Y)A11Y[k]=false;applyA11y();[].forEach.call(a11yPanel.querySelectorAll('.a11y-opt'),function(x){x.setAttribute('aria-pressed','false')})});
+  var st=el('a',{href:'#accessibility',class:'a11y-link'},L2.statement);st.addEventListener('click',function(){closeA11y(false)});
+  var cl=el('button',{type:'button',class:'a11y-link'},L2.close);cl.addEventListener('click',function(){closeA11y(true)});
+  row.appendChild(rs);row.appendChild(st);row.appendChild(cl);a11yPanel.appendChild(row);
+}
+function openA11y(){a11yOpen=true;renderA11y();a11yPanel.hidden=false;a11yBtn.setAttribute('aria-expanded','true');var f=a11yPanel.querySelector('button');if(f)f.focus()}
+function closeA11y(back){a11yOpen=false;a11yPanel.hidden=true;a11yBtn.setAttribute('aria-expanded','false');if(back)a11yBtn.focus()}
+a11yBtn.addEventListener('click',function(){a11yOpen?closeA11y(true):openA11y()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&a11yOpen){closeA11y(true)}});
+document.addEventListener('click',function(e){if(a11yOpen&&e.target.isConnected&&!a11yPanel.contains(e.target)&&!a11yBtn.contains(e.target))closeA11y(false)});
+document.getElementById('skip').addEventListener('click',function(e){e.preventDefault();var m=document.querySelector('#main .view:not([hidden]) a,#main .view:not([hidden]) button');(m||document.getElementById('main')).focus()});
+function setTitle(part){document.title=part?part+' · ZEHUT':'ZEHUT'}
+applyA11y();
+
+var UPDATED='08.11.2026';
+var DOCS_TEXT={
+ accessibility:{
+  he:'# הצהרת נגישות\n'+
+  'ZEHUT מאמין שכל אחד צריך להיות מסוגל לצפות בעבודות שלנו וליצור איתנו קשר. האתר נבנה מתוך מחשבה על אנשים עם מוגבלות, בהתאם לחוק שוויון זכויות לאנשים עם מוגבלות ולתקנות הנגישות לשירות.\n'+
+  '## רמת הנגישות\n- האתר הותאם בהתאם להנחיות התקן הישראלי 5568, המבוסס על הנחיות WCAG 2.0 ברמה AA, ככל שהדבר ניתן.\n- האתר נבדק בדפדפנים Chrome ו־Safari, במחשב ובטלפון.\n'+
+  '## מה נעשה באתר\n- ניווט מלא במקלדת, עם סימון ברור של הרכיב הפעיל.\n- קישור "דלג לתוכן" בתחילת הדף.\n- תמיכה בקוראי מסך: כותרות, תיאורים לכפתורים ולתמונות, ושפת הדף מוגדרת לפי הבחירה.\n- ניגודיות צבעים מוגברת בין הטקסט לרקע.\n- האתר זמין בעברית מימין לשמאל ובאנגלית.\n- האתר מכבד את הגדרת "הפחתת תנועה" של המכשיר.\n- תפריט נגישות (כפתור "נגישות" בראש הדף): הגדלת טקסט, ניגודיות גבוהה, עצירת תנועה, הדגשת קישורים וגופן פשוט.\n- אפשר להגדיל את התצוגה עם הגדרות הדפדפן בלי לפגוע בתוכן.\n'+
+  '## מגבלות ידועות\n- הסרטונים מוצגים בנגן של Vimeo, שהוא שירות חיצוני. הנגישות של הנגן עצמו באחריות Vimeo.\n- לחלק מהסרטונים אין כתוביות. הסרטונים הם דוגמאות עבודה, ואפשר לקבל תיאור מילולי של כל סרטון בפנייה אלינו.\n- התנועה בדף הבית (תזוזה לפי העכבר או הטיית הטלפון) נעצרת בלחיצה על "עצירת תנועה".\n'+
+  '## נתקלתם בבעיה?\nאם משהו באתר לא נגיש לכם, נשמח לדעת ולתקן. נחזור אליכם בהקדם.\n- רכז הנגישות: שרגא הולנדר\n- טלפון ו־WhatsApp: ‎+972 58-648-7601\n'+
+  '## עדכון\nההצהרה עודכנה ב־'+UPDATED+'.',
+  en:'# Accessibility statement\n'+
+  'ZEHUT believes everyone should be able to view our work and reach us. This site was built with people with disabilities in mind, in line with the Israeli Equal Rights for Persons with Disabilities Law and its service accessibility regulations.\n'+
+  '## Level of accessibility\n- The site follows Israeli Standard 5568, based on WCAG 2.0 level AA, as far as possible.\n- It was checked in Chrome and Safari, on computer and phone.\n'+
+  '## What we did\n- Full keyboard navigation, with a clear focus outline.\n- A "skip to content" link at the start of the page.\n- Screen reader support: headings, labels on buttons and images, and the page language set to the language chosen.\n- Stronger contrast between text and background.\n- The site is available in Hebrew (right to left) and English.\n- The site respects the device\'s "reduce motion" setting.\n- An accessibility menu (the "accessibility" button at the top): larger text, high contrast, stop motion, underline links and a plain font.\n- The page can be zoomed with the browser without losing content.\n'+
+  '## Known limitations\n- Films play in Vimeo\'s player, a third-party service. The player\'s own accessibility is Vimeo\'s responsibility.\n- Some films have no captions. They are work samples, and we will gladly describe any film in words on request.\n- Motion on the home page (following the mouse or the tilt of the phone) stops with "stop motion".\n'+
+  '## Found a problem?\nIf anything on the site is not accessible to you, please tell us and we will fix it. We will get back to you soon.\n- Accessibility coordinator: Shraga Hollander\n- Phone and WhatsApp: +972 58-648-7601\n'+
+  '## Updated\nThis statement was last updated on '+UPDATED+'.'
+ },
+ privacy:{
+  he:'# פרטיות ותנאי שימוש\n'+
+  '## מידע שאנחנו אוספים\n- האתר לא אוסף מידע אישי: אין בו טפסים, הרשמה או מעקב פרסומי.\n- האתר שומר בדפדפן שלכם בלבד (localStorage) את בחירת השפה והגדרות הנגישות, כדי לזכור אותן בביקור הבא. המידע הזה לא נשלח אלינו.\n'+
+  '## שירותים חיצוניים\n- הסרטונים מוצגים מ־Vimeo, ונטענים במצב "ללא מעקב" (Do Not Track). השימוש בנגן כפוף למדיניות הפרטיות של Vimeo.\n- הגופנים נטענים מ־Google Fonts.\n- לחיצה על מספר הוואטסאפ פותחת את WhatsApp, וההתכתבות כפופה לתנאים של WhatsApp.\n- האתר מאוחסן ב־GitHub Pages, שעשוי לשמור נתוני גישה טכניים כמו כתובת IP לצורכי אבטחה.\n'+
+  '## זכויות יוצרים\n- כל הסרטונים, התמונות והטקסטים באתר מוגנים בזכויות יוצרים של ZEHUT ושל הלקוחות שעבורם נוצרו. הם מוצגים כתיק עבודות באישור.\n- אין להעתיק, להוריד, להפיץ או להשתמש בתכנים לכל מטרה בלי אישור בכתב.\n- אם אתם בעלי זכויות בתוכן שמופיע כאן ואתם מבקשים להסיר אותו, פנו אלינו ונטפל בכך מיד.\n'+
+  '## אחריות\n- התכנים באתר מוצגים להתרשמות בלבד ואינם מהווים הצעה מחייבת. מחירים ותנאים נקבעים בהצעת מחיר כתובה.\n- קישורים לאתרים חיצוניים ניתנים לנוחות, ואיננו אחראים לתוכנם.\n'+
+  '## דין וסמכות\nעל השימוש באתר חלים דיני מדינת ישראל.\n'+
+  '## יצירת קשר\nשרגא הולנדר, ZEHUT · טלפון ו־WhatsApp: ‎+972 58-648-7601\n'+
+  '## עדכון\nעודכן ב־'+UPDATED+'.',
+  en:'# Privacy and terms\n'+
+  '## What we collect\n- The site does not collect personal information: no forms, no sign-up and no advertising tracking.\n- Your browser alone (localStorage) keeps your language and accessibility choices so they are remembered next time. This is never sent to us.\n'+
+  '## Outside services\n- Films are shown from Vimeo and load in "Do Not Track" mode. Using the player is subject to Vimeo\'s privacy policy.\n- Fonts load from Google Fonts.\n- Tapping the WhatsApp number opens WhatsApp, and conversations are subject to WhatsApp\'s terms.\n- The site is hosted on GitHub Pages, which may keep technical access data such as IP addresses for security.\n'+
+  '## Copyright\n- All films, images and text on this site are protected by the copyright of ZEHUT and of the clients they were made for. They are shown as a portfolio with permission.\n- Do not copy, download, share or reuse any of it without written permission.\n- If you hold rights in content shown here and want it removed, contact us and we will act right away.\n'+
+  '## Disclaimer\n- Content on this site is for presentation only and is not a binding offer. Prices and terms are set in a written quote.\n- Links to other sites are provided for convenience; we are not responsible for their content.\n'+
+  '## Law\nUse of this site is governed by the laws of the State of Israel.\n'+
+  '## Contact\nShraga Hollander, ZEHUT · phone and WhatsApp: +972 58-648-7601\n'+
+  '## Updated\nLast updated on '+UPDATED+'.'
+ }
+};
+function showDoc(k){
+  var dp=document.getElementById('docpage'),txt=DOCS_TEXT[k][LANG];dp.textContent='';
+  var art=el('article',{class:'doc-in',dir:LANG==='he'?'rtl':'ltr'}),ul=null;
+  txt.split('\n').forEach(function(line){
+    var m;
+    if((m=/^# (.+)/.exec(line))){art.appendChild(el('h2',{},m[1]));ul=null}
+    else if((m=/^## (.+)/.exec(line))){art.appendChild(el('h3',{},m[1]));ul=null}
+    else if((m=/^- (.+)/.exec(line))){if(!ul){ul=el('ul');art.appendChild(ul)}ul.appendChild(el('li',{},m[1]))}
+    else if(line.trim()){art.appendChild(el('p',{},line));ul=null}
+  });
+  var back=el('a',{href:'#',class:'doc-back'},LANG==='he'?'חזרה →':'← back');
+  art.appendChild(back);dp.appendChild(art);
+}
+
 function route(keep){
   var k=location.hash.slice(1),c=null;
   if(k==='edit'){setEditing(true);history.replaceState(null,'',location.pathname+location.search);k=''}
   for(var i=0;i<CATS.length;i++)if(CATS[i].key===k)c=CATS[i];
+  var dp=document.getElementById('docpage'),isDoc=(k==='accessibility'||k==='privacy');
+  dp.hidden=!isDoc;document.body.classList.toggle('in-doc',isDoc);
+  if(isDoc){stopInline();showDoc(k);['wall','home','about','film'].forEach(function(id){document.getElementById(id).hidden=true});document.body.classList.remove('in-wall','in-about','in-film');var al0=document.getElementById('aboutLink');al0.textContent=T[LANG].close;al0.setAttribute('href','#');window.scrollTo(0,0);setTitle(k==='accessibility'?(LANG==='he'?'הצהרת נגישות':'Accessibility statement'):(LANG==='he'?'פרטיות ותנאי שימוש':'Privacy and terms'));if(typeof renderEditor==='function')renderEditor();return}
+  else dp.textContent='';
   var filmEl=document.getElementById('film'),fm=/^film-(\d+)$/.exec(k),hit=fm?findFilm(fm[1]):null;
   filmEl.hidden=!hit;document.body.classList.toggle('in-film',!!hit);
-  if(hit){stopInline();showFilm(hit);wall.hidden=true;home.hidden=true;document.getElementById('about').hidden=true;document.body.classList.remove('in-wall','in-about');window.scrollTo(0,0);if(typeof renderEditor==='function')renderEditor();return}
+  if(hit){stopInline();showFilm(hit);setTitle(nameOf(hit.c)+' '+pad(hit.i+1));wall.hidden=true;home.hidden=true;document.getElementById('about').hidden=true;document.body.classList.remove('in-wall','in-about');window.scrollTo(0,0);if(typeof renderEditor==='function')renderEditor();return}
   else filmEl.textContent='';
   var aboutEl=document.getElementById('about'),al=document.getElementById('aboutLink'),isAbout=k==='about',wasAbout=!aboutEl.hidden,t=T[LANG];
   aboutEl.hidden=!isAbout;document.body.classList.toggle('in-about',isAbout);
   al.textContent=isAbout?t.close:t.about;al.setAttribute('href',isAbout?'#':'#about');
-  if(isAbout){stopInline();wall.hidden=true;home.hidden=true;document.body.classList.remove('in-wall');if(!wasAbout)window.scrollTo(0,0)}
-  else if(c){showWall(c);home.hidden=true;wall.hidden=false;document.body.classList.add('in-wall');layout();if(keep!==true)window.scrollTo(0,0)}
-  else{curCat=null;wall.hidden=true;home.hidden=false;document.body.classList.remove('in-wall')}
+  if(isAbout){setTitle(T[LANG].aboutH);stopInline();wall.hidden=true;home.hidden=true;document.body.classList.remove('in-wall');if(!wasAbout)window.scrollTo(0,0)}
+  else if(c){setTitle(nameOf(c));showWall(c);home.hidden=true;wall.hidden=false;document.body.classList.add('in-wall');layout();if(keep!==true)window.scrollTo(0,0)}
+  else{setTitle('');curCat=null;wall.hidden=true;home.hidden=false;document.body.classList.remove('in-wall')}
   if(typeof renderEditor==='function')renderEditor();
 }
 window.addEventListener('hashchange',function(){route()});
