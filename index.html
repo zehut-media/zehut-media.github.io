@@ -188,14 +188,12 @@ body.in-film .mark{opacity:.1;pointer-events:none}
 html[dir="rtl"] .skip{left:auto;right:12px}
 #main:focus{outline:none}
 a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--ink)!important;outline-offset:3px}
-.topl{position:fixed;left:calc(max(16px,env(safe-area-inset-left,0px)) + 1.5vw);top:calc(env(safe-area-inset-top,0px) + 4vh);z-index:6;display:flex;align-items:baseline;gap:18px}
+.topl{position:fixed;left:calc(max(16px,env(safe-area-inset-left,0px)) + 1.5vw);top:calc(env(safe-area-inset-top,0px) + 4vh);z-index:6;display:flex;align-items:baseline;gap:12px}
 .topl .lang{position:static}
 html[dir="rtl"] .topl{left:auto;right:calc(max(16px,env(safe-area-inset-right,0px)) + 1.5vw)}
-.a11y-btn{background:none;border:0;padding:6px 0;font-family:var(--type);font-size:12px;letter-spacing:.14em;color:var(--ink);cursor:pointer;position:relative}
-.a11y-btn::after{content:"";position:absolute;left:0;right:0;bottom:2px;height:1px;background:var(--ink);transform:scaleX(.3);transform-origin:left;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
-html[dir="rtl"] .a11y-btn::after{transform-origin:right}
-.a11y-btn:hover::after,.a11y-btn[aria-expanded="true"]::after{transform:scaleX(1)}
-.a11y-panel{position:fixed;left:calc(max(16px,env(safe-area-inset-left,0px)) + 1.5vw);top:calc(env(safe-area-inset-top,0px) + 4vh + 40px);z-index:120;background:var(--paper);border:1px solid var(--ink);padding:16px;width:min(280px,calc(100vw - 32px));box-sizing:border-box;display:flex;flex-direction:column;gap:6px;font-family:var(--type);box-shadow:0 24px 50px -30px rgba(30,25,15,.5)}
+.a11y-btn{background:none;border:0;padding:4px;margin:-4px 0;color:var(--soft);cursor:pointer;display:inline-flex;align-items:center;opacity:.75;transition:opacity .3s,color .3s;align-self:center}
+.a11y-btn:hover,.a11y-btn[aria-expanded="true"]{opacity:1;color:var(--ink)}
+html[dir="rtl"] .a11y-panel{position:fixed;left:calc(max(16px,env(safe-area-inset-left,0px)) + 1.5vw);top:calc(env(safe-area-inset-top,0px) + 4vh + 40px);z-index:120;background:var(--paper);border:1px solid var(--ink);padding:16px;width:min(280px,calc(100vw - 32px));box-sizing:border-box;display:flex;flex-direction:column;gap:6px;font-family:var(--type);box-shadow:0 24px 50px -30px rgba(30,25,15,.5)}
 html[dir="rtl"] .a11y-panel{left:auto;right:calc(max(16px,env(safe-area-inset-right,0px)) + 1.5vw)}
 .a11y-panel h2{margin:0 0 6px;font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--soft)}
 .a11y-opt{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;background:none;border:1px solid var(--hair);padding:10px 12px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer;text-align:start}
@@ -238,7 +236,7 @@ html.a11y-plain{--type:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Ne
 <h1 class="sr" id="h1">ZEHUT, creative agency</h1>
 <a class="mark" href="#" aria-label="ZEHUT, home">ZEHUT</a>
 <div class="tag" id="tag">creative agency</div>
-<div class="topl"><button class="lang" id="lang" type="button" aria-label="Switch language: English / עברית"><span data-l="en" lang="en">en</span><span data-l="he" lang="he">עב</span></button><button class="a11y-btn" id="a11yBtn" type="button" aria-haspopup="dialog" aria-controls="a11yPanel" aria-expanded="false">accessibility</button></div>
+<div class="topl"><button class="lang" id="lang" type="button" aria-label="Switch language: English / עברית"><span data-l="en" lang="en">en</span><span data-l="he" lang="he">עב</span></button><button class="a11y-btn" id="a11yBtn" type="button" aria-haspopup="dialog" aria-controls="a11yPanel" aria-expanded="false" aria-label="accessibility" title="accessibility"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="4" r="1.6" fill="currentColor" stroke="none"/><path d="M10 7.5v6h6l2.5 5"/><path d="M10 10h5"/><path d="M7.2 11.2a5.2 5.2 0 1 0 7.6 6.3"/></svg></button></div>
 <div class="a11y-panel" id="a11yPanel" role="dialog" aria-modal="false" aria-labelledby="a11yTitle" hidden></div>
 <div class="coord" id="coord">jerusalem<br>31.77° n · 35.21° e</div>
 <a class="about-link" id="aboutLink" href="#about">about</a>
@@ -343,7 +341,7 @@ function applyLang(){
   t.text.forEach(function(s){at.appendChild(el('p',{},s))});
   buildHome();
   [].forEach.call(document.querySelectorAll('#lang span'),function(s){s.classList.toggle('on',s.getAttribute('data-l')===LANG)});
-  document.getElementById('a11yBtn').textContent=t.a11y;document.getElementById('skip').textContent=t.skip;document.getElementById('h1').textContent=t.h1;
+  var ab=document.getElementById('a11yBtn');ab.setAttribute('aria-label',t.a11y);ab.setAttribute('title',t.a11y);document.getElementById('skip').textContent=t.skip;document.getElementById('h1').textContent=t.h1;
   var lk=document.getElementById('legalLinks');if(lk){lk.textContent='';lk.appendChild(el('a',{href:'#accessibility'},LANG==='he'?'הצהרת נגישות':'accessibility statement'));lk.appendChild(document.createTextNode(' · '));lk.appendChild(el('a',{href:'#privacy'},LANG==='he'?'פרטיות ותנאי שימוש':'privacy and terms'))}
   if(a11yOpen)renderA11y();
   route(true);
