@@ -346,7 +346,7 @@ function applyLang(){
   if(a11yOpen)renderA11y();
   route(true);
 }
-document.getElementById('lang').addEventListener('click',function(){
+document.getElementById('lang').addEventListener('click',function(){trackEvent('language',{to:LANG==='en'?'he':'en'});
   LANG=LANG==='en'?'he':'en';
   try{localStorage.setItem('zehut-lang',LANG)}catch(e){}
   applyLang();
@@ -450,11 +450,11 @@ function showWall(c){
     var th=el('button',{class:'thumb',type:'button','aria-label':T[LANG].play+' '+(i+1)+(v.title&&LANG==='en'?', '+v.title:'')+' · '+nameOf(c)});
     var img=el('img',{alt:'',decoding:'async'});
     th.appendChild(img);th.appendChild(el('span',{class:'play','aria-hidden':'true'},'▶'));
-    th.addEventListener('click',function(){if(!ARR)playInline(box,v)});
+    th.addEventListener('click',function(){if(!ARR){playInline(box,v);trackEvent('play-film',{category:c.en,film:v.id,title:v.title||''})}});
     box.appendChild(th);loadThumb(v.id,img);
     r.appendChild(box);
     if(v.title&&LANG==='en'){var p=el('p');p.appendChild(el('i',{},pad(i+1)));p.appendChild(document.createTextNode(v.title.toLowerCase()));r.appendChild(p)}
-    var op=el('a',{class:'open',href:'#film-'+v.id,'aria-label':LANG==='he'?'צפייה בגדול':'Watch large',title:LANG==='he'?'צפייה בגדול':'Watch large'},'⤢');
+    var op=el('a',{'data-film':v.id,'data-cat':c.en,class:'open',href:'#film-'+v.id,'aria-label':LANG==='he'?'צפייה בגדול':'Watch large',title:LANG==='he'?'צפייה בגדול':'Watch large'},'⤢');
     r.appendChild(op);
     r.appendChild(el('span',{class:'rs','aria-hidden':'true'}));
     grid.appendChild(r);
@@ -547,13 +547,38 @@ function renderA11y(){
   var cl=el('button',{type:'button',class:'a11y-link'},L2.close);cl.addEventListener('click',function(){closeA11y(true)});
   row.appendChild(rs);row.appendChild(st);row.appendChild(cl);a11yPanel.appendChild(row);
 }
-function openA11y(){a11yOpen=true;renderA11y();a11yPanel.hidden=false;a11yBtn.setAttribute('aria-expanded','true');var f=a11yPanel.querySelector('button');if(f)f.focus()}
+function openA11y(){trackEvent('accessibility-menu');a11yOpen=true;renderA11y();a11yPanel.hidden=false;a11yBtn.setAttribute('aria-expanded','true');var f=a11yPanel.querySelector('button');if(f)f.focus()}
 function closeA11y(back){a11yOpen=false;a11yPanel.hidden=true;a11yBtn.setAttribute('aria-expanded','false');if(back)a11yBtn.focus()}
 a11yBtn.addEventListener('click',function(){a11yOpen?closeA11y(true):openA11y()});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&a11yOpen){closeA11y(true)}});
 document.addEventListener('click',function(e){if(a11yOpen&&e.target.isConnected&&!a11yPanel.contains(e.target)&&!a11yBtn.contains(e.target))closeA11y(false)});
 document.getElementById('skip').addEventListener('click',function(e){e.preventDefault();var m=document.querySelector('#main .view:not([hidden]) a,#main .view:not([hidden]) button');(m||document.getElementById('main')).focus()});
-function setTitle(part){document.title=part?part+' · ZEHUT':'ZEHUT'}
+function setTitle(part){document.title=part?part+' · ZEHUT':'ZEHUT';var k=location.hash.slice(1);trackView('/'+(k?k.replace(/^film-/,'film/'):''),document.title)}
+/* ---------- Visitor stats (Umami, cookieless, invisible to visitors) ----------
+   Fill UMAMI_ID with the website ID from umami.is to switch it on. Visits from the owner's
+   own device (anyone who has opened the editor) are never counted. */
+var UMAMI_ID='';
+var statsOn=false,statsQueue=[];
+function isOwner(){try{return localStorage.getItem('zehut-edit')==='1'||localStorage.getItem('zehut-me')==='1'}catch(e){return false}}
+(function loadStats(){
+  if(!UMAMI_ID||isOwner())return;
+  var sc=document.createElement('script');sc.defer=true;sc.src='https://cloud.umami.is/script.js';
+  sc.setAttribute('data-website-id',UMAMI_ID);sc.setAttribute('data-auto-track','false');sc.setAttribute('data-do-not-track','false');
+  sc.onload=function(){statsOn=true;statsQueue.splice(0).forEach(function(f){f()})};
+  document.head.appendChild(sc);
+})();
+function stat(fn){if(!UMAMI_ID||isOwner())return;if(statsOn&&window.umami)fn();else statsQueue.push(fn)}
+var lastView='';
+function trackView(path,title){
+  if(path===lastView)return;lastView=path;
+  stat(function(){window.umami.track(function(p){return Object.assign({},p,{url:path,title:title||document.title})})});
+}
+function trackEvent(name,data){stat(function(){window.umami.track(name,data||{})})}
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a');if(!a)return;
+  if(a.classList.contains('open'))trackEvent('open-large',{category:a.getAttribute('data-cat'),film:a.getAttribute('data-film')});
+  else if(a.id==='wa')trackEvent('whatsapp-click',{from:location.hash||'#'});
+},true);
+
 applyA11y();
 
 var UPDATED='08.11.2026';
@@ -576,16 +601,16 @@ var DOCS_TEXT={
  },
  privacy:{
   he:'# פרטיות ותנאי שימוש\n'+
-  '## מידע שאנחנו אוספים\n- האתר לא אוסף מידע אישי: אין בו טפסים, הרשמה או מעקב פרסומי.\n- האתר שומר בדפדפן שלכם בלבד (localStorage) את בחירת השפה והגדרות הנגישות, כדי לזכור אותן בביקור הבא. המידע הזה לא נשלח אלינו.\n'+
-  '## שירותים חיצוניים\n- הסרטונים מוצגים מ־Vimeo, ונטענים במצב "ללא מעקב" (Do Not Track). השימוש בנגן כפוף למדיניות הפרטיות של Vimeo.\n- הגופנים נטענים מ־Google Fonts.\n- לחיצה על מספר הוואטסאפ פותחת את WhatsApp, וההתכתבות כפופה לתנאים של WhatsApp.\n- האתר מאוחסן ב־GitHub Pages, שעשוי לשמור נתוני גישה טכניים כמו כתובת IP לצורכי אבטחה.\n'+
+  '## מידע שאנחנו אוספים\n- האתר לא אוסף מידע אישי מזהה: אין בו טפסים, הרשמה או מעקב פרסומי.\n- האתר שומר בדפדפן שלכם בלבד (localStorage) את בחירת השפה והגדרות הנגישות, כדי לזכור אותן בביקור הבא. המידע הזה לא נשלח אלינו.\n'+
+  '## שירותים חיצוניים\n- כדי לדעת כמה אנשים מבקרים באתר ובמה הם צופים, האתר משתמש ב־Umami, כלי סטטיסטיקה ללא עוגיות שאוסף נתונים אנונימיים בלבד (עמודים שנצפו, סרטונים שהופעלו, מדינה וסוג מכשיר), בלי לזהות אתכם אישית.\n- הסרטונים מוצגים מ־Vimeo, ונטענים במצב "ללא מעקב" (Do Not Track). השימוש בנגן כפוף למדיניות הפרטיות של Vimeo.\n- הגופנים נטענים מ־Google Fonts.\n- לחיצה על מספר הוואטסאפ פותחת את WhatsApp, וההתכתבות כפופה לתנאים של WhatsApp.\n- האתר מאוחסן ב־GitHub Pages, שעשוי לשמור נתוני גישה טכניים כמו כתובת IP לצורכי אבטחה.\n'+
   '## זכויות יוצרים\n- כל הסרטונים, התמונות והטקסטים באתר מוגנים בזכויות יוצרים של ZEHUT ושל הלקוחות שעבורם נוצרו. הם מוצגים כתיק עבודות באישור.\n- אין להעתיק, להוריד, להפיץ או להשתמש בתכנים לכל מטרה בלי אישור בכתב.\n- אם אתם בעלי זכויות בתוכן שמופיע כאן ואתם מבקשים להסיר אותו, פנו אלינו ונטפל בכך מיד.\n'+
   '## אחריות\n- התכנים באתר מוצגים להתרשמות בלבד ואינם מהווים הצעה מחייבת. מחירים ותנאים נקבעים בהצעת מחיר כתובה.\n- קישורים לאתרים חיצוניים ניתנים לנוחות, ואיננו אחראים לתוכנם.\n'+
   '## דין וסמכות\nעל השימוש באתר חלים דיני מדינת ישראל.\n'+
   '## יצירת קשר\nשרגא הולנדר, ZEHUT · טלפון ו־WhatsApp: ‎+972 58-648-7601\n'+
   '## עדכון\nעודכן ב־'+UPDATED+'.',
   en:'# Privacy and terms\n'+
-  '## What we collect\n- The site does not collect personal information: no forms, no sign-up and no advertising tracking.\n- Your browser alone (localStorage) keeps your language and accessibility choices so they are remembered next time. This is never sent to us.\n'+
-  '## Outside services\n- Films are shown from Vimeo and load in "Do Not Track" mode. Using the player is subject to Vimeo\'s privacy policy.\n- Fonts load from Google Fonts.\n- Tapping the WhatsApp number opens WhatsApp, and conversations are subject to WhatsApp\'s terms.\n- The site is hosted on GitHub Pages, which may keep technical access data such as IP addresses for security.\n'+
+  '## What we collect\n- The site does not collect information that identifies you: no forms, no sign-up and no advertising tracking.\n- Your browser alone (localStorage) keeps your language and accessibility choices so they are remembered next time. This is never sent to us.\n'+
+  '## Outside services\n- To know how many people visit and what they watch, the site uses Umami, a cookie-free statistics tool that collects anonymous data only (pages viewed, films played, country and device type), without identifying you.\n- Films are shown from Vimeo and load in "Do Not Track" mode. Using the player is subject to Vimeo\'s privacy policy.\n- Fonts load from Google Fonts.\n- Tapping the WhatsApp number opens WhatsApp, and conversations are subject to WhatsApp\'s terms.\n- The site is hosted on GitHub Pages, which may keep technical access data such as IP addresses for security.\n'+
   '## Copyright\n- All films, images and text on this site are protected by the copyright of ZEHUT and of the clients they were made for. They are shown as a portfolio with permission.\n- Do not copy, download, share or reuse any of it without written permission.\n- If you hold rights in content shown here and want it removed, contact us and we will act right away.\n'+
   '## Disclaimer\n- Content on this site is for presentation only and is not a binding offer. Prices and terms are set in a written quote.\n- Links to other sites are provided for convenience; we are not responsible for their content.\n'+
   '## Law\nUse of this site is governed by the laws of the State of Israel.\n'+
@@ -610,6 +635,7 @@ function showDoc(k){
 function route(keep){
   var k=location.hash.slice(1),c=null;
   if(k==='edit'){setEditing(true);history.replaceState(null,'',location.pathname+location.search);k=''}
+  if(k==='me'){try{localStorage.setItem('zehut-me','1')}catch(e){}history.replaceState(null,'',location.pathname+location.search);k=''}
   for(var i=0;i<CATS.length;i++)if(CATS[i].key===k)c=CATS[i];
   var dp=document.getElementById('docpage'),isDoc=(k==='accessibility'||k==='privacy');
   dp.hidden=!isDoc;document.body.classList.toggle('in-doc',isDoc);
