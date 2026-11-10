@@ -557,7 +557,7 @@ function setTitle(part){document.title=part?part+' · ZEHUT':'ZEHUT';var k=locat
 /* ---------- Visitor stats (Umami, cookieless, invisible to visitors) ----------
    Fill UMAMI_ID with the website ID from umami.is to switch it on. Visits from the owner's
    own device (anyone who has opened the editor) are never counted. */
-var UMAMI_ID='';
+var UMAMI_ID='068876b2-c1a0-4931-839a-f61b4c964c35';
 var statsOn=false,statsQueue=[];
 function isOwner(){try{return localStorage.getItem('zehut-edit')==='1'||localStorage.getItem('zehut-me')==='1'}catch(e){return false}}
 (function loadStats(){
